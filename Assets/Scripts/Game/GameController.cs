@@ -1,14 +1,12 @@
 ﻿using Assets.Scripts.Cards;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(SpellsVisualPresenter))]
 [RequireComponent(typeof(BuffsController))]
-public class Game : MonoBehaviour
+public class GameController : MonoBehaviour
 {
-    public const float AttackInterval = 10f;
 
     [SerializeField]
     private GameBoard _board;
@@ -22,22 +20,14 @@ public class Game : MonoBehaviour
     [SerializeField]
     private GameScenario _scenario;
 
-
-
     [Space]
     [Header("UI")]
 
     [SerializeField]
-    private DefenderHud _defenderHud;
+    private UIManager _uiManager;
 
     [SerializeField]
     private HandUI _handUI;
-
-    [SerializeField]
-    private GameObject _gg; //поменять
-    
-    [SerializeField]
-    private GameObject _pause;
 
     [Space]
     [Header("Cards")]
@@ -49,7 +39,7 @@ public class Game : MonoBehaviour
 
     private GameScenario.State _activeScenario;
 
-    private HandManager _buildManager = new HandManager();
+    private HandManager _handManager = new HandManager();
     
     private BuffsController _buffsController; 
     
@@ -80,7 +70,7 @@ public class Game : MonoBehaviour
         set
         {
             _playerMoney = Mathf.Max(0, value);
-            _defenderHud.UpdatePlayerMoney(_playerMoney);
+            _uiManager.UpdateMoney(_playerMoney);
         }
     }
 
@@ -92,14 +82,14 @@ public class Game : MonoBehaviour
         set
         {
             _playerHealth = Mathf.Max(0, value);
-            _defenderHud.UpdatePlayerHealth(_playerHealth, _startingPlayerHealth);
+            _uiManager.UpdateHealth(_playerHealth, _startingPlayerHealth);
         }
     }
 
     private GameBehaviorCollection _enemies = new GameBehaviorCollection();
     private GameBehaviorCollection _nonEnemies = new GameBehaviorCollection();
 
-    private static Game _instance;
+    private static GameController _instance;
 
   
 
@@ -113,9 +103,8 @@ public class Game : MonoBehaviour
         _buffsController = GetComponent<BuffsController>(); 
         _spellsVisualizer = GetComponent<SpellsVisualPresenter>();
         _cardManager.Initialize(_playerDeck);
-        _buildManager.Initialize(_board, _cardManager, _handUI);
-        _board.Initialize(_contentFactory,_buffsController,_buildManager.CheckingTouch);
-      
+        _handManager.Initialize(_board, _cardManager, _handUI);
+        _board.Initialize(_contentFactory,_buffsController,_handManager.CheckingTouch);
         BeginNewGame();
     }
 
@@ -124,7 +113,7 @@ public class Game : MonoBehaviour
         if (_scenarioInProcess)
         {
             var (currentWave, wavesCount) = _activeScenario.GetWaves();
-            _defenderHud.UpdateScenarioWaves(currentWave, wavesCount);
+            _uiManager.UpdateScenarioWaves(currentWave, wavesCount);
             if (PlayerHealth <= 0)
             {
                 EndGame();
@@ -148,7 +137,7 @@ public class Game : MonoBehaviour
         {
             StopCoroutine(_moneyIncreaser);
         }
-        _gg.SetActive(true); 
+        _uiManager.SetGGScreen(true); 
         Time.timeScale = 0f;
     }
 
@@ -163,8 +152,6 @@ public class Game : MonoBehaviour
 
     public void BeginNewGame()
     {
-        _gg.SetActive(false); 
-        _pause.SetActive(false); 
         _scenarioInProcess = false;
         if (_prepareRoutine != null)
         {
@@ -177,11 +164,11 @@ public class Game : MonoBehaviour
         _enemies.Clear();
         _nonEnemies.Clear();
         _board.Clear();
-        _buildManager.Clear();
+        _handManager.Clear();
         PlayerHealth = _startingPlayerHealth;
         PlayerMoney = _startingPlayerMoney;
         _prepareRoutine = StartCoroutine(PrepareRoutine());
-        _defenderHud.PrepareTime(_prepareTime);
+        _uiManager.PrepareNewGame(_prepareTime);
         _spellsVisualizer.StopAll();
         Time.timeScale = 1f;
     }
@@ -193,12 +180,12 @@ public class Game : MonoBehaviour
 
     public static Enemy GetHighestHpEnemy()
     {
-        return _instance._enemies.GetHighestHp()?.GetComponent<Enemy>();
+        return _instance._enemies.GetHighestHp().GetComponent<Enemy>();
     }
 
     public static Enemy GetRandomEnemy()
     {
-        return _instance._enemies.GetRandom()?.GetComponent<Enemy>();
+        return _instance._enemies.GetRandom().GetComponent<Enemy>();
     }
 
     public static GameBehaviorCollection GetEnemies()
@@ -207,14 +194,17 @@ public class Game : MonoBehaviour
     }
     public static bool TrySpendMoney(int value)
     {
-        if (_instance.PlayerMoney < value) return false;
+        if (_instance.PlayerMoney < value) {
+            _instance._uiManager.ActivateNoGoldHint();
+            return false;
+        }
         _instance.PlayerMoney -= value;
         return true;
     }
 
     public void OnPauseClicked(bool isPaused)
     {
-        _pause.SetActive(!isPaused);
+        _uiManager.SetPauseScreen(!isPaused);
         Time.timeScale = isPaused ? 1f : 0f;
     }
 
@@ -224,7 +214,7 @@ public class Game : MonoBehaviour
         _enemies.Clear();
         _nonEnemies.Clear();
         _board.Clear();
-        _buildManager.Clear();
+        _handManager.Clear();
         Time.timeScale = 1f;
         SceneManager.LoadScene(Constants.MainMenuSceneNumber);
     }
@@ -254,7 +244,7 @@ public class Game : MonoBehaviour
     {
         yield return new WaitForSeconds(_prepareTime);
         _activeScenario = _scenario.Begin();
-        _defenderHud.PrepareTime(-1);
+        _uiManager.DisablePreparePhase();
         _scenarioInProcess = true;
         _moneyIncreaser = StartCoroutine(IncreaseMoney());
     }

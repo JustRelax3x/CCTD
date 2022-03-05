@@ -14,7 +14,7 @@ public class Bullet : MonoBehaviour
         _target = target;
         _pool = pool;
     }
-    public virtual void SetUpEffect(int effectDamage) { }
+    public virtual void SetUpEffectDamage(int effectDamage) { }
 
     protected void Update()
     {

@@ -91,7 +91,7 @@ public class GameBoard : MonoBehaviour
     public bool TryBuild(GameTile tile, Card card)
     {
         if (tile.Content.Type != GameTileContentType.Empty || tile.Way || card.Content <= GameTileContentType.Destination
-            || !Game.TrySpendMoney(card.Cost))
+            || !GameController.TrySpendMoney(card.Cost))
         {
             return false;
         }
@@ -122,7 +122,7 @@ public class GameBoard : MonoBehaviour
 
     public bool TryCastSpell(GameTile tile, Card card)
     {
-        if ((tile.Content.Type < GameTileContentType.Destination && !tile.Way) || card.Content != GameTileContentType.Spell || !Game.TrySpendMoney(card.Cost))
+        if ((tile.Content.Type < GameTileContentType.Destination && !tile.Way) || card.Content != GameTileContentType.Spell || !GameController.TrySpendMoney(card.Cost))
         {
             return false;
         }

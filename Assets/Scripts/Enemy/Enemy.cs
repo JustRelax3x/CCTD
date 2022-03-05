@@ -66,7 +66,7 @@ public class Enemy : GameBehavior
             _tileTo = _tileTo.NextTileOnPath;
             if (_tileTo == null)
             {
-                Game.EnemyReachedDestination();
+                GameController.EnemyReachedDestination();
                 Recycle();
                 return false;
             }

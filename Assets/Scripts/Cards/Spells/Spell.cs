@@ -13,26 +13,26 @@ namespace Assets.Scripts.Cards
 
         protected void CastHighestHp(int damage)
         {
-            Enemy enemy = Game.GetHighestHpEnemy();
+            Enemy enemy = GameController.GetHighestHpEnemy();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
-                Game.VisualizeSpell(this, enemy.gameObject.transform);
+                GameController.VisualizeSpell(this, enemy.gameObject.transform);
             }
         }
         protected void CastRandom(int damage)
         {
-            Enemy enemy = Game.GetRandomEnemy();
+            Enemy enemy = GameController.GetRandomEnemy();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
-                Game.VisualizeSpell(this, enemy.gameObject.transform);
+                GameController.VisualizeSpell(this, enemy.gameObject.transform);
             }
         }
 
         protected void Cast(IEnumerator enumerator)
         {
-            Game.StartSpellCoroutine(enumerator);
+            GameController.StartSpellCoroutine(enumerator);
         }
     }
 

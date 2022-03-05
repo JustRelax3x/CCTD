@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BulletTower : Tower
 {
-    private float _damage;
+    private int _damage;
     
     [SerializeField, Range(1f, 1000f)]
     private float _attackSpeed = 10f;
@@ -22,18 +22,19 @@ public class BulletTower : Tower
     private CardClass _cardClass;
 
     private const float _rangeCoefficient = 0.7f;
-    private int _buffedDamage;
-    private int _defaultbuffedDamage;
-    private int _buffedRange;
-    private int _targetsNum;
-    private int _defaultTargetsNum;
-    private int _buffedShots;
-    private bool _allTargetShot;
-    private bool _keepDamageBuffs;
+    private int _buffedDamage, _defaultbuffedDamage, _buffedRange,_targetsNum,_defaultTargetsNum;
+    private float _buffedTime;
     private short _maxDamage;
-    private bool _onlyGroupTargets;
-    private bool _doubleDamageGroupTarget;
-    private bool _doubleDamageSecondTargetOnly;
+    private bool _allTargetShot,_keepDamageBuffs,_onlyGroupTargets,_doubleDamageGroupTarget,_doubleDamageSecondTargetOnly;
+    private bool _BulletEffectDamageEqualTD;
+    public enum AttackType
+    {
+        Default,
+        MaxHp,
+        FullHp,
+    }
+
+    private AttackType _attackType;
 
     public override void Initialize(int range, int damage, CardClass cardClass)
     {
@@ -43,7 +44,8 @@ public class BulletTower : Tower
         _defaultTargetsNum = 1;
         _targetsNum = _defaultTargetsNum;
         _poolProvider = BulletPoolProvider.Instance;
-        switch (_cardClass)
+        _attackType = AttackType.Default;
+        switch (_cardClass)  
         {
             case CardClass.Pyromancer:
                 _bulletType = EffectType.Defualt;
@@ -72,7 +74,12 @@ public class BulletTower : Tower
         {
             ChooseShotType();   
         }
-        _attackTimer -= Time.deltaTime * _attackSpeed;
+        float tick = Time.deltaTime;
+        _attackTimer -= tick * _attackSpeed;
+        if (_buffedTime > 0)
+        {
+            BuffTimeTick(tick);
+        }
     }
 
     public override void SetBuffDamage(int buffedDamage)
@@ -95,7 +102,7 @@ public class BulletTower : Tower
 
     public override void SetBuffTargets(int targets)
     {
-        _buffedShots += 1;
+        _buffedTime += 1;
         if (targets == -1)
         {
             _allTargetShot = true;
@@ -140,14 +147,37 @@ public class BulletTower : Tower
         }
         if (_attackTimer <= 0)
         {
-            _attackTimer = Game.AttackInterval;
-            var pool = _poolProvider.GetPool(_bulletType);
-            var bullet = pool.GetBullet(transform.position);
-            bullet.Init(_damage, _attackSpeed / 2f, _target.Enemy, pool);
-            if (_buffedShots > 0)
+            Enemy enemy= _target.Enemy;
+            switch (_attackType)
             {
-                BuffShotUsed();
+                
+                case AttackType.Default:
+                    break;
+                case AttackType.MaxHp:
+                    {
+                        var enemies = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
+                        if (enemies[1] != null)
+                        {
+                            int i = 0;
+                            float maxhp = 0;
+                            while (enemies[i] != null)
+                            {
+                               Enemy enemy1 = enemies[i].transform.root.GetComponent<Enemy>();
+                                if (enemy1.Health > maxhp)
+                                {
+                                    maxhp = enemy1.Health;
+                                    enemy = enemy1;
+                                }
+                                i++;
+                            }
+                        }
+                        break;
+                    }
+                case AttackType.FullHp:
+                    break;
             }
+            InitBullet(enemy);
+            _attackTimer = Constants.AttackInterval;
         }
     }
 
@@ -172,6 +202,33 @@ public class BulletTower : Tower
             if (!_allTargetShot)
             {
                 var enemies = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
+                if (_attackType == AttackType.MaxHp && enemies[_targetsNum] != null)
+                {
+                    Enemy[] enemiesMaxHp = new Enemy[_targetsNum];
+                    float[] maxHp = new float[_targetsNum];
+                    int i = 0, j;
+                    while (enemies[i] != null)
+                    {
+                        Enemy enemy = enemies[i].transform.root.GetComponent<Enemy>();
+                        float hp = enemy.Health;
+                        for (j =0; j<_targetsNum; j++)
+                        {
+                            if (hp > maxHp[j])
+                            {
+                                int k = _targetsNum - 1;
+                                while (j < k)
+                                {
+                                    maxHp[k] = maxHp[k-1];
+                                    enemiesMaxHp[k] = enemiesMaxHp[k-1];
+                                }
+                                maxHp[j] = hp;
+                                enemiesMaxHp[j] = enemy;
+                                break;
+                            }
+                        }
+                        i++;
+                    }
+                }
                 if (_onlyGroupTargets)
                 {
                     if ( _targetsNum <= 1 || enemies[1] == null)
@@ -181,19 +238,17 @@ public class BulletTower : Tower
                 for (int i = 0; i < _targetsNum; i++)
                 {
                     if (enemies[i] == null) break;
-                    var pool = _poolProvider.GetPool(_bulletType);
-                    var bullet = pool.GetBullet(transform.position);
                     damageCoef = 1;
                     if (_doubleDamageGroupTarget || (_doubleDamageSecondTargetOnly && i == 1))
                     {
-                        damageCoef = 2;
+                        damageCoef *= 2;
                     }
-                    bullet.Init(_damage * damageCoef, _attackSpeed / 2f, enemies[i].transform.root.GetComponent<Enemy>(), pool);
+                    InitBullet(enemies[i].transform.root.GetComponent<Enemy>(), damageCoef);
                 }
             }
             else
             { //shoot all enemies
-                var enemies = Game.GetEnemies();
+                var enemies = GameController.GetEnemies();
                 for (int i = 0; i < enemies.Length; i++)
                 {
                     var pool = _poolProvider.GetPool(_bulletType);
@@ -207,17 +262,24 @@ public class BulletTower : Tower
                 }
                 _allTargetShot = false;
             } 
-            _attackTimer = Game.AttackInterval;
-            if (_buffedShots > 0)
-            {
-                BuffShotUsed();
-            }
+            _attackTimer = Constants.AttackInterval;
         }
     }
-    private void BuffShotUsed()
+
+    private void InitBullet(Enemy enemy, int damageCoef = 1)
     {
-        _buffedShots--;
-        if (_buffedShots == 0)
+        var pool = _poolProvider.GetPool(_bulletType);
+        var bullet = pool.GetBullet(transform.position);
+        if (_BulletEffectDamageEqualTD)
+        {
+            bullet.SetUpEffectDamage(_damage);
+        }
+        bullet.Init(_damage*damageCoef, _attackSpeed / 2f, enemy, pool);
+    }
+    private void BuffTimeTick(float time)
+    {
+        _buffedTime -= time;
+        if (_buffedTime <= 0)
         {
             _targetsNum = _defaultTargetsNum;
         }
@@ -225,13 +287,13 @@ public class BulletTower : Tower
 
     public void SetBuffTargets(int targets, int sec)
     {
-        _buffedShots += (int)(sec * _attackSpeed / Game.AttackInterval);
+        _buffedTime += sec;
         _targetsNum = targets;
     }
 
     public void AddBuffTargets(int sec)
     {
-        _buffedShots += (int)(sec * _attackSpeed / Game.AttackInterval);
+        _buffedTime += sec;
         _targetsNum += 1;
     }
 
@@ -252,17 +314,17 @@ public class BulletTower : Tower
         _maxDamage = maxDamage;
     }
 
-    public void SetOnlyGroupTargets()
+    public void ActivateOnlyGroupTargets()
     {
         _onlyGroupTargets = true;
     }
 
-    public void SetDoubleDamageGroupOnly()
+    public void ActivateDoubleDamageGroupOnly()
     {
         _doubleDamageGroupTarget = true;
     }
 
-    public void SetDoubleDamageSecondTargetOnly()
+    public void ActivateDoubleDamageSecondTargetOnly()
     {
         _doubleDamageSecondTargetOnly = true;
     }
@@ -270,5 +332,9 @@ public class BulletTower : Tower
     public void SetBulletType(EffectType bulletType)
     {
         _bulletType = bulletType;
+    }
+    public void ActivateBulletEffectDamageEqualTD()
+    {
+
     }
 }

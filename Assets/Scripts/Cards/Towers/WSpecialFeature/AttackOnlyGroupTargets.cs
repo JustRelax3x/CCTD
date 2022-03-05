@@ -10,7 +10,7 @@ namespace Assets.Scripts.Cards.Towers.WSpecialFeature
         public override UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
         {
             tower.SetDefaultTargetsNumber(DefaultTargetsNumber);
-            tower.SetOnlyGroupTargets();
+            tower.ActivateOnlyGroupTargets();
             return null;
         }
     }

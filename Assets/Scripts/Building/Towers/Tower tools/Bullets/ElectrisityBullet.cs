@@ -6,7 +6,7 @@ public class ElectrisityBullet : Bullet
     {
         private int _electrisityDamage = 1;
 
-        public override void SetUpEffect(int effectDamage)
+        public override void SetUpEffectDamage(int effectDamage)
         {
             _electrisityDamage = effectDamage;
         }

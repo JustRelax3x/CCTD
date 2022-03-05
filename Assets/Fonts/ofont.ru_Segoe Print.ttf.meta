@@ -1,8 +1,7 @@
 fileFormatVersion: 2
-guid: 53c7d9340a3685c408bc1cb0fdaf953f
-timeCreated: 1474751352
-licenseType: Pro
+guid: 983d260cb42db094e9c96ab15b4a6a3b
 TrueTypeFontImporter:
+  externalObjects: {}
   serializedVersion: 4
   fontSize: 16
   forceTextureCase: -2
@@ -10,13 +9,13 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Roboto
-  fallbackFontReferences:
-  - {fileID: 12800000, guid: 0092f7798b6beb94c80979279fa3c9f9, type: 3}
-  - {fileID: 12800000, guid: 06d08cbcfa41d1e49bbeedbe1bb43076, type: 3}
+  - Segoe Print
+  fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 
