@@ -17,7 +17,7 @@ public class HandManager
 
     private CardManager _cardManager;
 
-    public void Initialize(GameBoard gameBoard,CardManager cardManager, HandUI handUI)
+    public void Initialize(GameBoard gameBoard, CardManager cardManager, HandUI handUI)
     {
         _gameBoard = gameBoard;
         _cardManager = cardManager;

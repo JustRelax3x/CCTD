@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 namespace Assets.Scripts.Cards.Towers
 {
@@ -9,7 +8,7 @@ namespace Assets.Scripts.Cards.Towers
         public int DefaultBuffedDamage;
 
         public int DefaultBuffedRange;
-        public override UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
+        public override System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
         {
             if (DefaultBuffedDamage > 0) 
             tower.SetDefaultBuffedDamage(DefaultBuffedDamage);

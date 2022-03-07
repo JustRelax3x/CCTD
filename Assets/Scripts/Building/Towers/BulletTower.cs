@@ -147,36 +147,7 @@ public class BulletTower : Tower
         }
         if (_attackTimer <= 0)
         {
-            Enemy enemy= _target.Enemy;
-            switch (_attackType)
-            {
-                
-                case AttackType.Default:
-                    break;
-                case AttackType.MaxHp:
-                    {
-                        var enemies = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
-                        if (enemies[1] != null)
-                        {
-                            int i = 0;
-                            float maxhp = 0;
-                            while (enemies[i] != null)
-                            {
-                               Enemy enemy1 = enemies[i].transform.root.GetComponent<Enemy>();
-                                if (enemy1.Health > maxhp)
-                                {
-                                    maxhp = enemy1.Health;
-                                    enemy = enemy1;
-                                }
-                                i++;
-                            }
-                        }
-                        break;
-                    }
-                case AttackType.FullHp:
-                    break;
-            }
-            InitBullet(enemy);
+            InitBullet(ChooseEnemyByAttackType());
             _attackTimer = Constants.AttackInterval;
         }
     }
@@ -201,34 +172,8 @@ public class BulletTower : Tower
            
             if (!_allTargetShot)
             {
-                var enemies = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
-                if (_attackType == AttackType.MaxHp && enemies[_targetsNum] != null)
-                {
-                    Enemy[] enemiesMaxHp = new Enemy[_targetsNum];
-                    float[] maxHp = new float[_targetsNum];
-                    int i = 0, j;
-                    while (enemies[i] != null)
-                    {
-                        Enemy enemy = enemies[i].transform.root.GetComponent<Enemy>();
-                        float hp = enemy.Health;
-                        for (j =0; j<_targetsNum; j++)
-                        {
-                            if (hp > maxHp[j])
-                            {
-                                int k = _targetsNum - 1;
-                                while (j < k)
-                                {
-                                    maxHp[k] = maxHp[k-1];
-                                    enemiesMaxHp[k] = enemiesMaxHp[k-1];
-                                }
-                                maxHp[j] = hp;
-                                enemiesMaxHp[j] = enemy;
-                                break;
-                            }
-                        }
-                        i++;
-                    }
-                }
+                var enemiesColliders = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
+                Enemy[] enemies = ChooseEnemies(enemiesColliders);
                 if (_onlyGroupTargets)
                 {
                     if ( _targetsNum <= 1 || enemies[1] == null)
@@ -243,11 +188,11 @@ public class BulletTower : Tower
                     {
                         damageCoef *= 2;
                     }
-                    InitBullet(enemies[i].transform.root.GetComponent<Enemy>(), damageCoef);
+                    InitBullet(enemies[i], damageCoef);
                 }
             }
             else
-            { //shoot all enemies
+            { 
                 var enemies = GameController.GetEnemies();
                 for (int i = 0; i < enemies.Length; i++)
                 {
@@ -264,6 +209,92 @@ public class BulletTower : Tower
             } 
             _attackTimer = Constants.AttackInterval;
         }
+    }
+
+    private Enemy ChooseEnemyByAttackType()
+    {
+        Enemy enemy = _target.Enemy;
+        switch (_attackType)
+        {
+            case AttackType.Default:
+                break;
+            case AttackType.MaxHp:
+                {
+                    var enemies = TargetPoint.GetAllBufferedInBox(transform.position, _targetingRange * Vector3.one);
+                    if (enemies[1] != null)
+                    { 
+                       
+                        int i = 0;
+                        float maxhp = 0;
+                        while (enemies[i] != null)
+                        {
+                            Enemy enemy1 = enemies[i].transform.root.GetComponent<Enemy>();
+                            if (enemy1.Health > maxhp)
+                            {
+                                maxhp = enemy1.Health;
+                                enemy = enemy1;
+                            }
+                            i++;
+                        }
+                    }
+                    break;
+                }
+            case AttackType.FullHp:
+                break;
+        }
+        return enemy;
+    }
+    private Enemy[] ChooseEnemies(Collider[] enemies)
+    {
+        Enemy[] enemiesMaxHp = new Enemy[_targetsNum];
+        if (enemies[_targetsNum] == null)
+        {
+            for (int i = 0; i < _targetsNum; i++)
+            {
+                if (enemies[i] == null) return enemiesMaxHp;
+                enemiesMaxHp[i] = enemies[i].transform.root.GetComponent<Enemy>();
+            }
+        }
+        switch (_attackType)
+        {
+            case AttackType.Default:
+            {
+                    for (int i = 0; i < _targetsNum; i++) {
+                        enemiesMaxHp[i] = enemies[i].transform.root.GetComponent<Enemy>();
+                    }
+                    break;
+            }
+            case AttackType.MaxHp:
+            {
+                float[] maxHp = new float[_targetsNum];
+                int i = 0, j;
+                while (enemies[i] != null)
+                {
+                    Enemy enemy = enemies[i].transform.root.GetComponent<Enemy>();
+                    float hp = enemy.Health;
+                    for (j = 0; j < _targetsNum; j++)
+                    {
+                        if (hp > maxHp[j])
+                        {
+                            int k = _targetsNum - 1;
+                            while (j < k)
+                            {
+                                maxHp[k] = maxHp[k - 1];
+                                enemiesMaxHp[k] = enemiesMaxHp[k - 1];
+                            }
+                            maxHp[j] = hp;
+                            enemiesMaxHp[j] = enemy;
+                            break;
+                        }
+                    }
+                    i++;
+                }
+                break;
+            }
+            case AttackType.FullHp:
+                goto case AttackType.Default; //change
+        }
+        return enemiesMaxHp;
     }
 
     private void InitBullet(Enemy enemy, int damageCoef = 1)
@@ -335,6 +366,6 @@ public class BulletTower : Tower
     }
     public void ActivateBulletEffectDamageEqualTD()
     {
-
+        _BulletEffectDamageEqualTD = true;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 [CreateAssetMenu(menuName = "Card/Default")]
 public class Card : ScriptableObject
@@ -15,7 +14,7 @@ public class Card : ScriptableObject
 
     public virtual void CastSpell() {}
     public virtual void CastSpell(GameTile tile = null) {}
-    public virtual UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null) { return null; }
+    public virtual System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null) { return null; }
 }
 
 public enum CardRarity

@@ -2,14 +2,14 @@
 
 namespace Assets.Scripts.Cards.Towers.WSpecialFeature
 {
-    [CreateAssetMenu(menuName = "Card/WSpecialFeature/AttackOnlyGroupTargets")]
-    public class AttackOnlyGroupTargets : Card
+    [CreateAssetMenu(menuName = "Card/WSpecialFeature/DDWhenGroupTarget")]
+    public class DDWhenGroupTarget : Card
     {
         public int DefaultTargetsNumber;
         public override System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
         {
             tower.SetDefaultTargetsNumber(DefaultTargetsNumber);
-            tower.ActivateOnlyGroupTargets();
+            tower.ActivateDoubleDamageGroupOnly();
             return null;
         }
     }

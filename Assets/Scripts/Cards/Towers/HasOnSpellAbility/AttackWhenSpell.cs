@@ -1,26 +1,25 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 namespace Assets.Scripts.Cards.Towers
 {
     [CreateAssetMenu(menuName = "Card/WOnSpell/EnableAttack")]
     public class AttackWhenSpell : Card
     {
-        public int DefaultAttackTargets;
-        public int BuffedAttackTargets;
+        public int DefaultTargetsAmount;
+        public int BuffedAttackTargetsAmount;
         public int BuffActionTime;
 
         private BulletTower _tower;
-        public override UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
+        public override System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
         {
             _tower = tower;
-            _tower.SetDefaultTargetsNumber(DefaultAttackTargets);
+            _tower.SetDefaultTargetsNumber(DefaultTargetsAmount);
             return BuffAttackTargets;
         }
 
         private void BuffAttackTargets()
         {
-            _tower.SetBuffTargets(BuffedAttackTargets, BuffActionTime);
+            _tower.SetBuffTargets(BuffedAttackTargetsAmount, BuffActionTime);
         }
     }
 }

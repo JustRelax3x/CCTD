@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.Cards
 {
     public class BuffsController : MonoBehaviour
     {
-        private UnityAction _onSpellUsed;
+        private System.Action _onSpellUsed;
         public void SetUpContent(Card card, GameTile tile)
         {
             BulletTower tower;
@@ -19,7 +17,7 @@ namespace Assets.Scripts.Cards
                 Debug.LogError("Trying to buff" + tile.Content + "Idk how.");
                 return;
             }
-            UnityAction action = card.GetTowerSetUpOnSpell(tower, tile);
+            System.Action action = card.GetTowerSetUpOnSpell(tower, tile);
             if (action != null)
                 _onSpellUsed += action;
         }

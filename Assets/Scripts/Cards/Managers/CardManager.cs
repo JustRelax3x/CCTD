@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class CardManager
@@ -9,15 +8,24 @@ public class CardManager
     private Stack<Card> _shuffledDeck = new Stack<Card>();
     private Card[] _hand = new Card[4];
     public int MaxCardsAmount => _orirginalDeck.Count;
+    
+    public bool OneClassDeck { get; private set; }
 
     public void Initialize(PlayerDeck playerDeck)
     {
         int size = playerDeck.Deck.Length;
+        CardClass cardClass = playerDeck.Deck[0].Class;
+        bool isOneClassDeck = true;
         _orirginalDeck.Clear();
         for (int i = 0; i < size; i++)
         {
             _orirginalDeck.Add(playerDeck.Deck[i]);
+            if (cardClass != playerDeck.Deck[i].Class)
+            {
+                isOneClassDeck = false;
+            }
         }
+        OneClassDeck = isOneClassDeck;
     }
 
     private void Shuffle(ref List<Card> cards)

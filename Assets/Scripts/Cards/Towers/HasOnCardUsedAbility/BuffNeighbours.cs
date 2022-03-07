@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 namespace Assets.Scripts.Cards.Towers.HasOnCardUsedAbility
 {
@@ -7,7 +6,7 @@ namespace Assets.Scripts.Cards.Towers.HasOnCardUsedAbility
 public class BuffNeighbours : Card
 {
     public int BuffActionSeconds;
-    public override UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
+    public override System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
     {
         if (tile.North.Content.Type == GameTileContentType.BulletTower)
         {

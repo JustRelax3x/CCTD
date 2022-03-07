@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 namespace Assets.Scripts.Cards.Towers
 {
@@ -11,7 +10,7 @@ namespace Assets.Scripts.Cards.Towers
         public bool KeepRange;
         public short MaxRange;
 
-        public override UnityAction GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
+        public override System.Action GetTowerSetUpOnSpell(BulletTower tower, GameTile tile = null)
         {
             if (KeepDamage)
                 tower.KeepAllDamageBuffs(MaxDamage);
