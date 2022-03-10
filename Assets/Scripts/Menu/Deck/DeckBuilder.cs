@@ -6,9 +6,14 @@ public class DeckBuilder : MonoBehaviour
 {
     [SerializeField]
     private CardPrefab[] _playerDeckPrefab = new CardPrefab[Constants.DeckSize];
+    [SerializeField]
+    private CardPrefab[] _allCards;
+    [SerializeField]
+    private PlayerDeck _allGameCards;
     private int _deckActiveCards = 0;
     private bool _removeMode;
     private PlayerDeck _playerDeck;
+    private Queue<CardClass> _devotionToBeChosen = new Queue<CardClass>();
 
     private Stack<int> _freeSlots = new Stack<int>();
 
@@ -17,6 +22,7 @@ public class DeckBuilder : MonoBehaviour
     {
         _levelSelector = levelSelector;
         _playerDeck = deck;
+        InitializeCards();
         _freeSlots.Clear();
         int size = 0;
         while (size < Constants.DeckSize)
@@ -56,11 +62,23 @@ public class DeckBuilder : MonoBehaviour
             _playerDeckPrefab[slot].Card = card;
             _playerDeck.Deck[slot] = card;
             _playerDeckPrefab[slot].gameObject.SetActive(true);
+            if (!_devotionToBeChosen.Contains(card.Class))
             _deckActiveCards++;
-           
+        }
+        if (_deckActiveCards == Constants.DeckSize)
+        {
+            CardClass cardClass;
+            for (int i=0; i < _deckActiveCards; i++)
+            {
+                cardClass = _playerDeckPrefab[i].Card.Class;
+                if (!_devotionToBeChosen.Contains(cardClass))
+                {
+                    _devotionToBeChosen.Enqueue(cardClass);
+                }
+            }
+
         }
     }
-
     public void OnRemoveButtonClicked(Image image)
     {
         _removeMode = !_removeMode;
@@ -74,6 +92,18 @@ public class DeckBuilder : MonoBehaviour
             _playerDeckPrefab[slot].gameObject.SetActive(false);
             _deckActiveCards--;
             _freeSlots.Push(slot);
+        }
+    }
+
+    private void InitializeCards()
+    {
+        for (int i=0; i<_allCards.Length; i++) //to do: init only visible + 1 row, if scrolled -> all (more). 
+        {
+            _allCards[i].Card = _allGameCards.Deck[i];
+        }
+        if (_allGameCards.Deck.Length != _allCards.Length)
+        {
+            Debug.LogError("Game Cards length != card prefab length");
         }
     }
 

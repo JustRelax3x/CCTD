@@ -8,6 +8,7 @@ public class ElectrisityBullet : Bullet
 
         public override void SetUpEffectDamage(int effectDamage)
         {
+            if (effectDamage <= 0) return;
             _electrisityDamage = effectDamage;
         }
         private void OnTriggerEnter(Collider other)

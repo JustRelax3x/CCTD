@@ -20,9 +20,9 @@ public class GameTileContent : MonoBehaviour
 
     public virtual void Initialize(int rangeCoefficient, int damage, CardClass cardClass) { }
 
-    public virtual void SetBuffDamage(int buffableDamage) {}
+    public virtual void AddBuffDamage(int buffableDamage) {}
 
-    public virtual void SetBuffRange(int buffedRange) {}
+    public virtual void AddBuffRange(int buffedRange) {}
     public virtual void SetBuffTargets(int targets) {}
 }
 

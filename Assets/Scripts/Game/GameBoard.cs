@@ -25,10 +25,13 @@ public class GameBoard : MonoBehaviour
 
     private UnityAction<GameTile> action;
 
+    public event System.Action SpellUsed;
+
     public void Initialize(GameTileContentFactory contentFactory,BuffsController buffsController, UnityAction<GameTile> OnTileTouch)
     {
         _contentFactory = contentFactory;
         _buffsController = buffsController;
+        _buffsController.Initialize(SpellUsed);
         action = OnTileTouch;
         for (int i=0,y = 0; y < _size.y; y++)
         {
@@ -134,7 +137,7 @@ public class GameBoard : MonoBehaviour
         {
             card.CastSpell(tile);
         }
-        _buffsController.SpellUsed();
+        SpellUsed.Invoke();
         return true;
     }
     public void Clear()

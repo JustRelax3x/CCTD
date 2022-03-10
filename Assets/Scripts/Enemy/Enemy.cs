@@ -19,7 +19,7 @@ public class Enemy : GameBehavior
 
     private float _maxHealth;
 
-    private bool[] _effects = new bool[(int)EffectType.Defualt];
+    private bool[] _effects = new bool[sizeof(EffectType)];
 
     private int _effectDamage;
 

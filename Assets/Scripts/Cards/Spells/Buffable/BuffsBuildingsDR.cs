@@ -23,16 +23,16 @@ namespace Assets.Scripts.Cards.Spells
         }
         private IEnumerator BuffDamage(int buffableDamage, int time, GameTile tile)
         {
-            tile.Content.SetBuffDamage(buffableDamage);
+            tile.Content.AddBuffDamage(buffableDamage);
                 yield return new WaitForSeconds(time);
-            tile.Content.SetBuffDamage(0);
+            tile.Content.AddBuffDamage(-buffableDamage);
         }
 
         private IEnumerator BuffRange(int buffableRange, int time, GameTile tile)
         {
-            tile.Content.SetBuffRange(buffableRange);
+            tile.Content.AddBuffRange(buffableRange);
             yield return new WaitForSeconds(time);
-            tile.Content.SetBuffRange(0);
+            tile.Content.AddBuffRange(-buffableRange);
         }
     }
 }

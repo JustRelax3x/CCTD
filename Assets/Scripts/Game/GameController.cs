@@ -75,6 +75,7 @@ public class GameController : MonoBehaviour
     }
 
     private int _playerHealth;
+    private System.Action _hpChanged;
 
     private int PlayerHealth
     {
@@ -83,6 +84,7 @@ public class GameController : MonoBehaviour
         {
             _playerHealth = Mathf.Max(0, value);
             _uiManager.UpdateHealth(_playerHealth, _startingPlayerHealth);
+            _hpChanged?.Invoke();
         }
     }
 
@@ -192,6 +194,16 @@ public class GameController : MonoBehaviour
     {
         return _instance._enemies;
     }
+
+    public static float GetHpProcent()
+    {
+        return _instance._playerHealth / _instance._startingPlayerHealth;
+    }
+    public static void SubscribeOnHpChanged(System.Action action)
+    {
+        _instance._hpChanged += action;
+    }
+
     public static bool TrySpendMoney(int value)
     {
         if (_instance.PlayerMoney < value) {

@@ -19,7 +19,7 @@ public class BulletTower : Tower
 
     private EffectType _bulletType;
 
-    private CardClass _cardClass;
+    public CardClass CardClass { get; private set; }
 
     private const float _rangeCoefficient = 0.7f;
     private int _buffedDamage, _defaultbuffedDamage, _buffedRange,_targetsNum,_defaultTargetsNum;
@@ -40,32 +40,12 @@ public class BulletTower : Tower
     {
         _targetingRange += range * _rangeCoefficient;
         _damage = damage;
-        _cardClass = cardClass;
+        CardClass = cardClass;
         _defaultTargetsNum = 1;
         _targetsNum = _defaultTargetsNum;
         _poolProvider = BulletPoolProvider.Instance;
         _attackType = AttackType.Default;
-        switch (_cardClass)  
-        {
-            case CardClass.Pyromancer:
-                _bulletType = EffectType.Defualt;
-                break;
-            case CardClass.Warlock:
-                _bulletType = EffectType.Defualt;
-                break;
-            case CardClass.Priest:
-                _bulletType = EffectType.Electrisity;
-                break;
-            case CardClass.Wizard:
-                _bulletType = EffectType.Defualt;
-                break;
-            case CardClass.Druid:
-                _bulletType = EffectType.Defualt;
-                break;
-            case CardClass.Neutral:
-                _bulletType = EffectType.Defualt;
-                break;
-        }
+        _bulletType = _poolProvider.GetBuletEffect(CardClass);
     }
 
     public override void GameUpdate()
@@ -82,21 +62,21 @@ public class BulletTower : Tower
         }
     }
 
-    public override void SetBuffDamage(int buffedDamage)
+    public override void AddBuffDamage(int buffedDamage)
     {
         if (!_keepDamageBuffs)
         _damage -= _buffedDamage;
-        _buffedDamage = buffedDamage + _defaultbuffedDamage;
+        _buffedDamage += buffedDamage > 0 ? buffedDamage + _defaultbuffedDamage : buffedDamage - _defaultbuffedDamage;
         _damage += _buffedDamage;
         if (_keepDamageBuffs && _damage > _maxDamage)
             _damage = _maxDamage;
 
     }
 
-    public override void SetBuffRange(int buffedRange)
+    public override void AddBuffRange(int buffedRange)
     {
         _targetingRange -= _buffedRange * _rangeCoefficient;
-        _buffedRange = buffedRange;
+        _buffedRange += buffedRange;
         _targetingRange += _buffedRange * _rangeCoefficient;
     }
 
