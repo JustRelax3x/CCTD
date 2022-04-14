@@ -36,7 +36,7 @@ public class UIManager : MonoBehaviour
     {
         _pause.SetActive(flag);
     }
-    public void PrepareNewGame(int prepareTime)
+    public void PrepareNewGame(float prepareTime)
     {
         SetGGScreen(false);
         SetPauseScreen(false);

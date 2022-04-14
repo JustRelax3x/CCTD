@@ -16,19 +16,33 @@ public class ElectrisityExtraZip : Bullet
     private void OnTriggerEnter(Collider other)
     {
         if (_target != null)
-            _target.TakeDamage(_ownerDamage, EffectType.Electrisity, _electrisityDamage);
-        if (!_extraZipUsed)
         {
-            var enemies = TargetPoint.GetAllBufferedInBox(transform.position, Constants.HalfTile * Vector3.one);
-            bool hasEnemy = enemies[0] != null;
-            if (hasEnemy)
+            _target.TakeDamage(_ownerDamage, EffectType.Electrisity, _electrisityDamage);
+            if (!_extraZipUsed)
             {
-                _target = enemies[0].transform.root.GetComponent<Enemy>();
-                _ownerDamage = _extraZipDamage;
-                _extraZipUsed = true;
-                return;
+                var enemies = TargetPoint.GetAllBufferedInBox(other.transform.position, Constants.HalfTile * Vector3.one);
+                int num;
+                bool hasEnemy;
+                if (other == enemies[0])
+                {
+                    hasEnemy = enemies[1] != null;
+                    num = 1;
+                }
+                else
+                {
+                    hasEnemy = enemies[0] != null;
+                    num = 0;
+                }
+                if (hasEnemy)
+                {
+                    _target = enemies[num].transform.root.GetComponent<Enemy>();
+                    _ownerDamage = _extraZipDamage;
+                    _extraZipUsed = true;
+                    return;
+                }
             }
         }
+        _extraZipUsed = false;
         _pool.ReturnBullet(this);
     }
 }

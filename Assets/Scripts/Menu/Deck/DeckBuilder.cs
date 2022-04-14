@@ -10,10 +10,12 @@ public class DeckBuilder : MonoBehaviour
     private CardPrefab[] _allCards;
     [SerializeField]
     private PlayerDeck _allGameCards;
+    [SerializeField]
+    private ClassEffectSelector _classEffectSelector;
     private int _deckActiveCards = 0;
     private bool _removeMode;
     private PlayerDeck _playerDeck;
-    private Queue<CardClass> _devotionToBeChosen = new Queue<CardClass>();
+    private Queue<CardClass> _classEffectToBeChosen = new Queue<CardClass>();
 
     private Stack<int> _freeSlots = new Stack<int>();
 
@@ -62,7 +64,7 @@ public class DeckBuilder : MonoBehaviour
             _playerDeckPrefab[slot].Card = card;
             _playerDeck.Deck[slot] = card;
             _playerDeckPrefab[slot].gameObject.SetActive(true);
-            if (!_devotionToBeChosen.Contains(card.Class))
+            if (!_classEffectToBeChosen.Contains(card.Class))
             _deckActiveCards++;
         }
         if (_deckActiveCards == Constants.DeckSize)
@@ -71,12 +73,12 @@ public class DeckBuilder : MonoBehaviour
             for (int i=0; i < _deckActiveCards; i++)
             {
                 cardClass = _playerDeckPrefab[i].Card.Class;
-                if (!_devotionToBeChosen.Contains(cardClass))
+                if (!_classEffectToBeChosen.Contains(cardClass))
                 {
-                    _devotionToBeChosen.Enqueue(cardClass);
+                    _classEffectToBeChosen.Enqueue(cardClass);
                 }
             }
-
+            _classEffectSelector.InitClassEffects(_classEffectToBeChosen);
         }
     }
     public void OnRemoveButtonClicked(Image image)

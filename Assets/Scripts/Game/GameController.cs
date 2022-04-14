@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(SpellsVisualPresenter))]
-[RequireComponent(typeof(BuffsController))]
+[RequireComponent(typeof(BuffsHandler))]
 public class GameController : MonoBehaviour
 {
 
@@ -41,29 +41,18 @@ public class GameController : MonoBehaviour
 
     private HandManager _handManager = new HandManager();
     
-    private BuffsController _buffsController; 
+    private BuffsHandler _buffsController; 
     
     private SpellsVisualPresenter _spellsVisualizer;
 
     [Space]
     [Header("Stats")]
 
-    [SerializeField, Range(1, 100)]
-    private int _startingPlayerHealth = 20;
-
-    private bool _scenarioInProcess = false;
-
-    [SerializeField, Range(1, 100)]
-    private int _startingPlayerMoney = 10;
-    
-    [SerializeField, Range(0, 30)]
-    private int _prepareTime = 10;
-
     [SerializeField]
-    private float _moneyIncreasingDelay = 1f;
+    private LevelStats _levelStats;
 
     private int _playerMoney;
-
+    private bool _scenarioInProcess = false;
     private int PlayerMoney
     {
         get => _playerMoney;
@@ -83,7 +72,7 @@ public class GameController : MonoBehaviour
         set
         {
             _playerHealth = Mathf.Max(0, value);
-            _uiManager.UpdateHealth(_playerHealth, _startingPlayerHealth);
+            _uiManager.UpdateHealth(_playerHealth, _levelStats.StartingPlayerHealth);
             _hpChanged?.Invoke();
         }
     }
@@ -95,18 +84,20 @@ public class GameController : MonoBehaviour
 
   
 
-    private void OnEnable()
+    private void Awake()
     {
         _instance = this;
     }
 
     private void Start()
     {
-        _buffsController = GetComponent<BuffsController>(); 
+        _buffsController = GetComponent<BuffsHandler>(); 
         _spellsVisualizer = GetComponent<SpellsVisualPresenter>();
         _cardManager.Initialize(_playerDeck);
         _handManager.Initialize(_board, _cardManager, _handUI);
         _board.Initialize(_contentFactory,_buffsController,_handManager.CheckingTouch);
+        _waitMoneyIncreasingDelay = new WaitForSeconds(_levelStats.MoneyIncreasingDelay);
+        _waitPrepareTime = new WaitForSeconds(_levelStats.PrepareTime);
         BeginNewGame();
     }
 
@@ -163,15 +154,11 @@ public class GameController : MonoBehaviour
         {
             StopCoroutine(_moneyIncreaser);
         }
-        _enemies.Clear();
-        _nonEnemies.Clear();
-        _board.Clear();
-        _handManager.Clear();
-        PlayerHealth = _startingPlayerHealth;
-        PlayerMoney = _startingPlayerMoney;
+        Clear();
+        PlayerHealth = _levelStats.StartingPlayerHealth;
+        PlayerMoney = _levelStats.StartingPlayerMoney;
         _prepareRoutine = StartCoroutine(PrepareRoutine());
-        _uiManager.PrepareNewGame(_prepareTime);
-        _spellsVisualizer.StopAll();
+        _uiManager.PrepareNewGame(_levelStats.PrepareTime);
         Time.timeScale = 1f;
     }
 
@@ -197,7 +184,7 @@ public class GameController : MonoBehaviour
 
     public static float GetHpProcent()
     {
-        return _instance._playerHealth / _instance._startingPlayerHealth;
+        return _instance._playerHealth / _instance._levelStats.StartingPlayerHealth;
     }
     public static void SubscribeOnHpChanged(System.Action action)
     {
@@ -223,23 +210,31 @@ public class GameController : MonoBehaviour
     public void Menu()
     {
         StopAllCoroutines();
+        Clear();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(Constants.MainMenuSceneNumber);
+    }
+
+    private void Clear()
+    {
         _enemies.Clear();
         _nonEnemies.Clear();
         _board.Clear();
         _handManager.Clear();
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(Constants.MainMenuSceneNumber);
+        _spellsVisualizer.StopAll();
     }
 
     private Coroutine _prepareRoutine;
     
     private Coroutine _moneyIncreaser;
 
+    private WaitForSeconds _waitMoneyIncreasingDelay;
+
     private IEnumerator IncreaseMoney()
     {
         while (_scenarioInProcess)
         {
-            yield return new WaitForSeconds(_moneyIncreasingDelay);
+            yield return _waitMoneyIncreasingDelay;
             PlayerMoney++;
         }
     }
@@ -252,9 +247,11 @@ public class GameController : MonoBehaviour
     {
         _instance._spellsVisualizer.VisualizeSpell(spell, transform);
     }
+
+    private WaitForSeconds _waitPrepareTime;
     private IEnumerator PrepareRoutine()
     {
-        yield return new WaitForSeconds(_prepareTime);
+        yield return _waitPrepareTime;
         _activeScenario = _scenario.Begin();
         _uiManager.DisablePreparePhase();
         _scenarioInProcess = true;

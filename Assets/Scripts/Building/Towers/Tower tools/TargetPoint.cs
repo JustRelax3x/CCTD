@@ -19,7 +19,7 @@ public class TargetPoint : MonoBehaviour
 
     private const int ENEMY_LAYER_MASK = 1 << 9;
 
-    private static Collider[] _buffer = new Collider[100];
+    private static Collider[] _buffer = new Collider[20];
     public static int BufferedCount { get; private set; }
 
     private SphereCollider _collider;
@@ -33,22 +33,34 @@ public class TargetPoint : MonoBehaviour
 
     public static bool FillBufferInCapsule(Vector3 position, float range)
     {
+        ClearBuffer();
         BufferedCount = Physics.OverlapCapsuleNonAlloc(position, position, range, _buffer, ENEMY_LAYER_MASK);
         return BufferedCount > 0;
     }
 
     public static bool FillBufferInBox(Vector3 position, Vector3 halfSize)
     {
+        ClearBuffer();
         BufferedCount = Physics.OverlapBoxNonAlloc(position, halfSize, _buffer,
             Quaternion.identity, ENEMY_LAYER_MASK);
         return BufferedCount > 0;
     }
     public static Collider[] GetAllBufferedInBox(Vector3 position, Vector3 halfSize)
     {
-        Physics.OverlapBoxNonAlloc(position, halfSize, _buffer,
+        ClearBuffer();
+        BufferedCount = Physics.OverlapBoxNonAlloc(position, halfSize, _buffer,
             Quaternion.identity, ENEMY_LAYER_MASK);
         return _buffer;
     }
+
+    private static void ClearBuffer()
+    {
+        for (int i=0; i < BufferedCount; i++)
+        {
+            _buffer[i] = null;
+        }
+        BufferedCount = 0;
+    } 
 
     public static TargetPoint GetBuffered(int index)
     {

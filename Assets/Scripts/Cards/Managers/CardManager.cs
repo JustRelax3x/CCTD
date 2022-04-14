@@ -9,7 +9,7 @@ public class CardManager
     private Card[] _hand = new Card[4];
     public int MaxCardsAmount => _orirginalDeck.Count;
     
-    public bool OneClassDeck { get; private set; }
+    public static bool OneClassDeck { get; private set; }
 
     public void Initialize(PlayerDeck playerDeck)
     {

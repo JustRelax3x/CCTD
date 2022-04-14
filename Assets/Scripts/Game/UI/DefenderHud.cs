@@ -42,7 +42,7 @@ using UnityEngine.UI;
         _currentWave = currentWave;
     }
 
-    public void PrepareTime(int prepareTime)
+    public void PrepareTime(float prepareTime)
     {
         if (prepareTime > 0)
         {

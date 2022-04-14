@@ -7,6 +7,12 @@ public class LevelSelector : MonoBehaviour
 	[SerializeField]
 	private Button[] _levelButtons;
 
+	[SerializeField]
+	private PlayerClassEffect _playerClassEffect;
+
+	[SerializeField]
+	private LevelStats _levelStats;
+
 	private MenuScreenPresenter _screenPresenter;
 
 	private int _deckLength;
@@ -38,6 +44,9 @@ public class LevelSelector : MonoBehaviour
         }
 		else
         {
+			ClassEffectHandler classEffectHandler = new ClassEffectHandler();
+			_levelStats.SetUpLevelStats(LevelStats.LevelStartMode.Default);
+			classEffectHandler.GetAllActiveEffects(_playerClassEffect.ClassEffects);
 			SceneManager.LoadScene(Constants.FirstLevelSceneNumber + level);
         }
 	}

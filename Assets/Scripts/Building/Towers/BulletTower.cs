@@ -64,10 +64,10 @@ public class BulletTower : Tower
 
     public override void AddBuffDamage(int buffedDamage)
     {
-        if (!_keepDamageBuffs)
-        _damage -= _buffedDamage;
-        _buffedDamage += buffedDamage > 0 ? buffedDamage + _defaultbuffedDamage : buffedDamage - _defaultbuffedDamage;
-        _damage += _buffedDamage;
+        if (_keepDamageBuffs && buffedDamage < 0) return; 
+        int value = buffedDamage > 0 ? buffedDamage + _defaultbuffedDamage : buffedDamage - _defaultbuffedDamage;
+        _buffedDamage += value;
+        _damage += value;
         if (_keepDamageBuffs && _damage > _maxDamage)
             _damage = _maxDamage;
 
@@ -75,7 +75,6 @@ public class BulletTower : Tower
 
     public override void AddBuffRange(int buffedRange)
     {
-        _targetingRange -= _buffedRange * _rangeCoefficient;
         _buffedRange += buffedRange;
         _targetingRange += _buffedRange * _rangeCoefficient;
     }

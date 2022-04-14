@@ -48,7 +48,12 @@ public class HandManager
             _currentState = State.Building;
             return;
         }
-        _currentState = State.Casting;
+        if (_card.Content == GameTileContentType.Spell) {
+            _currentState = State.Casting;
+            return;
+        }
+        _currentState = State.Null;
+
     }
 
     public void CheckingTouch(GameTile tile)

@@ -19,19 +19,17 @@ public class GameBoard : MonoBehaviour
 
     private List<GameTileContent> _contentToUpdate = new List<GameTileContent>();
 
-    private BuffsController _buffsController;
+    private BuffsHandler _buffsController;
 
     public int SpawnPointCount => _spawnPoints.Count;
 
     private UnityAction<GameTile> action;
 
-    public event System.Action SpellUsed;
-
-    public void Initialize(GameTileContentFactory contentFactory,BuffsController buffsController, UnityAction<GameTile> OnTileTouch)
+    public void Initialize(GameTileContentFactory contentFactory,BuffsHandler buffsController, UnityAction<GameTile> OnTileTouch)
     {
         _contentFactory = contentFactory;
         _buffsController = buffsController;
-        _buffsController.Initialize(SpellUsed);
+        _buffsController.Initialize();
         action = OnTileTouch;
         for (int i=0,y = 0; y < _size.y; y++)
         {
@@ -137,7 +135,7 @@ public class GameBoard : MonoBehaviour
         {
             card.CastSpell(tile);
         }
-        SpellUsed.Invoke();
+        _buffsController.SpellUsed();
         return true;
     }
     public void Clear()
